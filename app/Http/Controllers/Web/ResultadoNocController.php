@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Http\Controllers\Web;
+
+use App\Http\Controllers\Controller;
+use App\Models\ResultadoNoc;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
+class ResultadoNocController extends Controller
+{
+    public function index(Request $request)
+    {
+        $allowedPerPage = [10, 25, 50, 100];
+        $perPage = (int) ($request->query('per_page', 25));
+        if (!in_array($perPage, $allowedPerPage, true)) { $perPage = 25; }
+        $itens = ResultadoNoc::orderBy('titulo')->paginate($perPage)->appends($request->query());
+        return view('sistema-parametros.resultados', compact('itens','perPage','allowedPerPage'));
+    }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'codigo' => 'nullable|string|max:50',
+            'titulo' => 'required|string|max:255',
+            'definicao' => 'nullable|string',
+            'dominio' => 'nullable|string|max:255',
+            'ativo' => 'nullable|boolean',
+        ]);
+        if ($validator->fails()) {
+            return redirect()->route('sistema-parametros.resultados')
+                ->withErrors($validator)->withInput();
+        }
+        $dados = $validator->validated();
+        $dados['ativo'] = (bool) ($request->input('ativo', false));
+        ResultadoNoc::create($dados);
+        return redirect()->route('sistema-parametros.resultados', $request->only(['per_page','page']))
+            ->with('success','Resultado criado com sucesso');
+    }
+
+    public function update(Request $request, int $id)
+    {
+        $item = ResultadoNoc::findOrFail($id);
+        $validator = Validator::make($request->all(), [
+            'codigo' => 'nullable|string|max:50',
+            'titulo' => 'required|string|max:255',
+            'definicao' => 'nullable|string',
+            'dominio' => 'nullable|string|max:255',
+            'ativo' => 'nullable|boolean',
+        ]);
+        if ($validator->fails()) {
+            return redirect()->route('sistema-parametros.resultados')
+                ->withErrors($validator)->withInput();
+        }
+        $dados = $validator->validated();
+        $dados['ativo'] = (bool) ($request->input('ativo', false));
+        $item->update($dados);
+        return redirect()->route('sistema-parametros.resultados', $request->only(['per_page','page']))
+            ->with('success','Resultado atualizado com sucesso');
+    }
+
+    public function destroy(Request $request, int $id)
+    {
+        $item = ResultadoNoc::findOrFail($id);
+        $item->delete();
+        return redirect()->route('sistema-parametros.resultados', $request->only(['per_page','page']))
+            ->with('success','Resultado removido com sucesso');
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
