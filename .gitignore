@@ -8,7 +8,6 @@
 /storage/*.key
 
 # Environment
-.env
 .env.backup
 .env.*.backup
 .env.local
@@ -30,7 +29,6 @@ pnpm-debug.log*
 
 *.log
 .DS_Store
-.env
 .env.backup
 .env.production
 .phpactor.json
